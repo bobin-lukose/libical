@@ -1592,10 +1592,14 @@ icaltimezone *icaltimezone_get_utc_timezone(void)
 
     if (!builtin_timezones) {
         printf("Initializing builtin timezones\n");
+        fflush(stdout);
+
         icaltimezone_init_builtin_timezones();
     }
 
     printf("Returning UTC timezone: tzid = %s, tznames = %s\n", utc_timezone.tzid, utc_timezone.tznames);
+    fflush(stdout);
+
 
     return &utc_timezone;
 }
@@ -1620,6 +1624,7 @@ static void icaltimezone_init_builtin_timezones_bkup(void)
 static void icaltimezone_init_builtin_timezones(void)
 {
     printf("Initializing builtin timezones\n");
+    fflush(stdout);
 
     /* Initialize the special UTC timezone. */
     utc_timezone.tzid = (char *)"UTC";
@@ -1627,11 +1632,15 @@ static void icaltimezone_init_builtin_timezones(void)
     icaltimezone_builtin_lock();
     if (!builtin_timezones) {
         printf("Parsing zone tab to initialize timezones\n");
+        fflush(stdout);
+
         icaltimezone_parse_zone_tab();
     }
     icaltimezone_builtin_unlock();
 
     printf("Initialization of builtin timezones complete\n");
+    fflush(stdout);
+
 }
 
 static int parse_coord(char *coord, int len, int *degrees, int *minutes, int *seconds)
