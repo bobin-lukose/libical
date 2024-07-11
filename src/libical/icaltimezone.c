@@ -1623,7 +1623,7 @@ static void icaltimezone_init_builtin_timezones_bkup(void)
 
 static void icaltimezone_init_builtin_timezones(void)
 {
-    printf("Initializing builtin timezones\n");
+    printf("In function icaltimezone_init_builtin_timezones \n");
     fflush(stdout);
 
     /* Initialize the special UTC timezone. */
