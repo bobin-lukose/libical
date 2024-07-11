@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "postgres.h"
-#include "utils/elog.h"
+#include <stdio.h>
+#include <string.h>
 
 #if ICAL_SYNC_MODE == ICAL_SYNC_MODE_PTHREAD
 #include <pthread.h>
@@ -1466,31 +1466,30 @@ icaltimezone *icaltimezone_get_builtin_timezone_from_offset_bkup(int offset, con
     return NULL;
 }
 
-
 icaltimezone *icaltimezone_get_builtin_timezone_from_offset(int offset, const char *tzname)
 {
     icaltimezone *zone = NULL;
     size_t i, count;
 
-    elog(INFO, "Function called with offset: %d, tzname: %s", offset, tzname ? tzname : "NULL");
+    printf("Entering function with offset: %d and tzname: %s\n", offset, tzname);
 
     if (!builtin_timezones) {
-        elog(INFO, "Initializing built-in timezones...");
+        printf("Initializing builtin timezones\n");
         icaltimezone_init_builtin_timezones();
     }
 
     if (offset == 0) {
-        elog(INFO, "Offset is 0, returning UTC timezone");
+        printf("Returning UTC timezone\n");
         return &utc_timezone;
     }
 
     if (!tzname) {
-        elog(INFO, "Timezone name is NULL, returning NULL");
+        printf("tzname is NULL, returning NULL\n");
         return NULL;
     }
 
     count = builtin_timezones->num_elements;
-    elog(INFO, "Number of built-in timezones: %zu", count);
+    printf("Number of built-in timezones: %zu\n", count);
 
     for (i = 0; i < count; i++) {
         int z_offset;
@@ -1499,20 +1498,17 @@ icaltimezone *icaltimezone_get_builtin_timezone_from_offset(int offset, const ch
         icaltimezone_load_builtin_timezone(zone);
 
         z_offset = get_offset(zone);
-
-        elog(INFO, "Checking timezone: %s, offset: %d", zone->tznames ? zone->tznames : "NULL", z_offset);
+        printf("Checking timezone: %s with offset: %d\n", zone->tznames, z_offset);
 
         if (z_offset == offset && zone->tznames && !strcmp(tzname, zone->tznames)) {
-            elog(INFO, "Match found: %s", zone->tznames);
+            printf("Found matching timezone: %s\n", zone->tznames);
             return zone;
         }
     }
 
-    elog(INFO, "No matching timezone found, returning NULL");
+    printf("No matching timezone found, returning NULL\n");
     return NULL;
 }
-
-
 
 icaltimezone *icaltimezone_get_builtin_timezone_from_tzid(const char *tzid)
 {
