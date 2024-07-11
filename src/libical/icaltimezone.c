@@ -1729,7 +1729,7 @@ static int fetch_lat_long_from_string(const char *str,
  * timezones in the zones.tab file are sorted by their name, which is
  * useful for binary searches.
  */
-static void icaltimezone_parse_zone_tab(void)
+static void icaltimezone_parse_zone_tab_bkup(void)
 {
     const char *zonedir, *zonetab;
     char *filename;
@@ -1855,6 +1855,165 @@ static void icaltimezone_parse_zone_tab(void)
 
     fclose(fp);
 }
+
+
+static void icaltimezone_parse_zone_tab(void)
+{
+    const char *zonedir, *zonetab;
+    char *filename;
+    FILE *fp;
+    char buf[1024];      /* Used to store each line of zones.tab as it is read. */
+    char location[1024]; /* Stores the city name when parsing buf. */
+    size_t filename_len;
+    int latitude_degrees = 0, latitude_minutes = 0, latitude_seconds = 0;
+    int longitude_degrees = 0, longitude_minutes = 0, longitude_seconds = 0;
+    icaltimezone zone;
+
+    printf("Entering function icaltimezone_parse_zone_tab\n");
+
+    /* Check if builtin_timezones is already initialized */
+    icalerror_assert(builtin_timezones == NULL, "Parsing zones.tab file multiple times");
+
+    /* Allocate memory for builtin_timezones array */
+    builtin_timezones = icalarray_new(sizeof(icaltimezone), 1024);
+    if (!builtin_timezones) {
+        printf("Failed to allocate memory for builtin_timezones array\n");
+        return;
+    }
+
+    /* Determine the directory and filename for zones.tab based on configuration */
+    if (!use_builtin_tzdata) {
+        zonedir = icaltzutil_get_zone_directory();
+        zonetab = ZONES_TAB_SYSTEM_FILENAME;
+    } else {
+        zonedir = get_zone_directory_builtin();
+        zonetab = ZONES_TAB_FILENAME;
+    }
+
+    /* Calculate the length of the filename */
+    filename_len = 0;
+    if (zonedir) {
+        filename_len = strlen(zonedir);
+    }
+
+    /* Ensure that a zoneinfo directory is found */
+    icalerror_assert(filename_len > 0, "Unable to locate a zoneinfo dir");
+    if (filename_len == 0) {
+        icalerror_set_errno(ICAL_INTERNAL_ERROR);
+        return;
+    }
+
+    /* Prepare the complete filename for zones.tab */
+    filename_len += strlen(zonetab);
+    filename_len += 2; /* for dir separator and final '\0' */
+
+    filename = (char *)icalmemory_new_buffer(filename_len);
+    if (!filename) {
+        printf("Failed to allocate memory for filename buffer\n");
+        icalerror_set_errno(ICAL_NEWFAILED_ERROR);
+        return;
+    }
+    snprintf(filename, filename_len, "%s/%s", zonedir, zonetab);
+
+    /* Open the zones.tab file for reading */
+    printf("Opening file: %s\n", filename);
+    fp = fopen(filename, "r");
+    icalmemory_free_buffer(filename);
+
+    /* Check if file opened successfully */
+    if (!fp) {
+        printf("Failed to open file: %s\n", filename);
+        icalerror_set_errno(ICAL_INTERNAL_ERROR);
+        return;
+    }
+
+    /* Read each line of zones.tab */
+    printf("Reading and parsing zonetab file\n");
+    while (fgets(buf, (int)sizeof(buf), fp)) {
+        printf("Read line from file: %s\n", buf);
+
+        if (*buf == '#') {
+            printf("Skipping comment line: %s\n", buf);
+            continue;
+        }
+
+        /* Parse latitude, longitude, and location from each line */
+        if (use_builtin_tzdata) {
+            /* The format of each line is: "[ latitude longitude ] location". */
+            if (buf[0] != '+' && buf[0] != '-') {
+                latitude_degrees = longitude_degrees = 360;
+                latitude_minutes = longitude_minutes = 0;
+                latitude_seconds = longitude_seconds = 0;
+                if (sscanf(buf, "%1000s", location) != 1) {
+                    printf("Invalid timezone description line: %s\n", buf);
+                    continue;
+                }
+            } else if (sscanf(buf, "%4d%2d%2d %4d%2d%2d %1000s",
+                              &latitude_degrees, &latitude_minutes,
+                              &latitude_seconds,
+                              &longitude_degrees, &longitude_minutes,
+                              &longitude_seconds, location) != 7) {
+                printf("Invalid timezone description line: %s\n", buf);
+                continue;
+            }
+        } else {
+            /* Handle custom parsing based on application logic */
+            /* coverity[tainted_data] */
+            if (fetch_lat_long_from_string(buf, &latitude_degrees, &latitude_minutes,
+                                           &latitude_seconds,
+                                           &longitude_degrees, &longitude_minutes,
+                                           &longitude_seconds, location)) {
+                printf("Invalid timezone description line: %s\n", buf);
+                continue;
+            }
+        }
+
+        /* Initialize the timezone structure with parsed data */
+        icaltimezone_init(&zone);
+        zone.location = icalmemory_strdup(location);
+
+        /* Calculate latitude and longitude values */
+        if (latitude_degrees >= 0) {
+            zone.latitude =
+                (double)latitude_degrees +
+                (double)latitude_minutes / 60 +
+                (double)latitude_seconds / 3600;
+        } else {
+            zone.latitude =
+                (double)latitude_degrees -
+                (double)latitude_minutes / 60 -
+                (double)latitude_seconds / 3600;
+        }
+
+        if (longitude_degrees >= 0) {
+            zone.longitude =
+                (double)longitude_degrees +
+                (double)longitude_minutes / 60 +
+                (double)longitude_seconds / 3600;
+        } else {
+            zone.longitude =
+                (double)longitude_degrees -
+                (double)longitude_minutes / 60 -
+                (double)longitude_seconds / 3600;
+        }
+
+        /* Add the timezone to the builtin_timezones array */
+        icalarray_append(builtin_timezones, &zone);
+
+        /* Print details of the parsed zone for logging purposes */
+        printf("Found zone: %s (lat: %d:%d:%d, long: %d:%d:%d)\n",
+               zone.location,
+               latitude_degrees, latitude_minutes, latitude_seconds,
+               longitude_degrees, longitude_minutes, longitude_seconds);
+    }
+
+    /* Close the zones.tab file */
+    fclose(fp);
+
+    /* Logging completion of zones.tab parsing */
+    printf("Parsing zones.tab complete\n");
+}
+
 
 void icaltimezone_release_zone_tab(void)
 {
