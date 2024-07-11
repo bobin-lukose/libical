@@ -1540,7 +1540,8 @@ fflush(stdout);
     if (!builtin_timezones)
         icaltimezone_init_builtin_timezones();
 
-    printf("3. UTC Timezone: %s (Offset: %d)\n", utc_timezone.name, utc_timezone.offset);
+    printf("3. UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
+
 
     return &utc_timezone;
 }
