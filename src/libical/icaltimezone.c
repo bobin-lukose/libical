@@ -1588,6 +1588,7 @@ icaltimezone *icaltimezone_get_utc_timezone_bkup(void)
 icaltimezone *icaltimezone_get_utc_timezone(void)
 {
     printf("Entering function icaltimezone_get_utc_timezone\n");
+    fflush(stdout);
 
     if (!builtin_timezones) {
         printf("Initializing builtin timezones\n");
