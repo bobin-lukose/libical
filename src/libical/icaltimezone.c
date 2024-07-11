@@ -1432,7 +1432,7 @@ static int get_offset(icaltimezone *zone)
     return offset;
 }
 
-icaltimezone *icaltimezone_get_builtin_timezone_from_offset(int offset, const char *tzname)
+icaltimezone *icaltimezone_get_builtin_timezone_from_offset_bkup(int offset, const char *tzname)
 {
     icaltimezone *zone = NULL;
     size_t i, count;
@@ -1462,6 +1462,54 @@ icaltimezone *icaltimezone_get_builtin_timezone_from_offset(int offset, const ch
 
     return NULL;
 }
+
+
+icaltimezone *icaltimezone_get_builtin_timezone_from_offset(int offset, const char *tzname)
+{
+    icaltimezone *zone = NULL;
+    size_t i, count;
+
+    elog(INFO, "Function called with offset: %d, tzname: %s", offset, tzname ? tzname : "NULL");
+
+    if (!builtin_timezones) {
+        elog(INFO, "Initializing built-in timezones...");
+        icaltimezone_init_builtin_timezones();
+    }
+
+    if (offset == 0) {
+        elog(INFO, "Offset is 0, returning UTC timezone");
+        return &utc_timezone;
+    }
+
+    if (!tzname) {
+        elog(INFO, "Timezone name is NULL, returning NULL");
+        return NULL;
+    }
+
+    count = builtin_timezones->num_elements;
+    elog(INFO, "Number of built-in timezones: %zu", count);
+
+    for (i = 0; i < count; i++) {
+        int z_offset;
+
+        zone = icalarray_element_at(builtin_timezones, i);
+        icaltimezone_load_builtin_timezone(zone);
+
+        z_offset = get_offset(zone);
+
+        elog(INFO, "Checking timezone: %s, offset: %d", zone->tznames ? zone->tznames : "NULL", z_offset);
+
+        if (z_offset == offset && zone->tznames && !strcmp(tzname, zone->tznames)) {
+            elog(INFO, "Match found: %s", zone->tznames);
+            return zone;
+        }
+    }
+
+    elog(INFO, "No matching timezone found, returning NULL");
+    return NULL;
+}
+
+
 
 icaltimezone *icaltimezone_get_builtin_timezone_from_tzid(const char *tzid)
 {
