@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#include "postgres.h"
+#include "utils/elog.h"
+
 #if ICAL_SYNC_MODE == ICAL_SYNC_MODE_PTHREAD
 #include <pthread.h>
 #if defined(PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP)
