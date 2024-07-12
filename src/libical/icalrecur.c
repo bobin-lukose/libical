@@ -1922,6 +1922,7 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
                                            struct icaltimetype dtstart)
 {
     printf("Bob1 Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
+    fflush(stdout);
     icalrecur_iterator *impl;
     icalrecurrencetype_frequency freq = rule.freq;
     enum byrule byrule;
@@ -1960,6 +1961,7 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
     impl->iend = icaltime_null_time();
 
     printf("Bob Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
+    fflush(stdout);
 
     /* Set up convenience pointers to make the code simpler. Allows
        us to iterate through all of the BY* arrays in the rule. */
