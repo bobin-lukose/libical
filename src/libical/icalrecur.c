@@ -134,8 +134,6 @@
 #include <stddef.h> /* For offsetof() macro */
 #include <stdlib.h>
 
-#include <stdio.h>
-
 #if ICAL_SYNC_MODE == ICAL_SYNC_MODE_PTHREAD
 #include <pthread.h>
 static pthread_mutex_t invalid_rrule_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -1932,9 +1930,6 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
         return 0;
     }
 
-printf("icalrecur_iterator_new function Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
-fflush(stdout);
-
 #define IN_RANGE(val, min, max) (val >= min && val <= max)
 
     /* Make sure that DTSTART is a sane value */
@@ -1946,10 +1941,6 @@ fflush(stdout);
         (!dtstart.is_date && (!IN_RANGE(dtstart.hour, 0, 23) ||
                               !IN_RANGE(dtstart.minute, 0, 59) ||
                               !IN_RANGE(dtstart.second, 0, 59)))) {
-
-    printf("Invalid DTSTART");
-
-
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
         return 0;
     }
@@ -1961,11 +1952,11 @@ fflush(stdout);
 
     memset(impl, 0, sizeof(icalrecur_iterator));
 
-    printf("Validated dtstart: %s\n", icaltime_as_ical_string(dtstart));
-
     impl->dtstart = dtstart;
     impl->rule = rule;
     impl->iend = icaltime_null_time();
+
+    printf("Bob Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
 
     /* Set up convenience pointers to make the code simpler. Allows
        us to iterate through all of the BY* arrays in the rule. */
