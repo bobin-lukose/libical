@@ -134,6 +134,8 @@
 #include <stddef.h> /* For offsetof() macro */
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #if ICAL_SYNC_MODE == ICAL_SYNC_MODE_PTHREAD
 #include <pthread.h>
 static pthread_mutex_t invalid_rrule_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -3142,6 +3144,9 @@ static int check_contracting_rules(icalrecur_iterator *impl)
 
 struct icaltimetype icalrecur_iterator_next(icalrecur_iterator *impl)
 {
+    printf("In icalrecur_iterator_next function \n");
+    fflush(stdout);
+
     /* Quit if we reached COUNT or if last time is after the UNTIL time */
     if (!impl ||
         (impl->rule.count != 0 && impl->occurrence_no >= impl->rule.count) ||
