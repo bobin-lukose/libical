@@ -1919,6 +1919,7 @@ static void adjust_to_byday(icalrecur_iterator *impl)
 icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
                                            struct icaltimetype dtstart)
 {
+    printf("Bob1 Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
     icalrecur_iterator *impl;
     icalrecurrencetype_frequency freq = rule.freq;
     enum byrule byrule;
