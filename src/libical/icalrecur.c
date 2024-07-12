@@ -1021,7 +1021,7 @@ static void setup_defaults(icalrecur_iterator *impl,
     printf("Entering setup_defaults\n");
     printf("Frequency: %d, BY rule: %d, Default time: %d\n", freq, byrule, deftime);
 
-    if (expand_map[freq].map[byrule] == EXPAND) {
+    if (expand_map[freq].map[byrule] == EXPAND && byrule!=6) {
         printf("Expanding BY rule: %d\n", byrule);
         
         /* Re-write the BY rule arrays with data from the DTSTART time */
@@ -2118,11 +2118,6 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
     printf("DTSTART: %s\n", icaltime_as_ical_string(dtstart));
     fflush(stdout);
 
-    /* Conditionally modify expand_map for BY_MINUTE */
-    if (freq == ICAL_HOURLY_RECURRENCE) { // Replace with the appropriate frequency constant
-        expand_map[freq].map[BY_MINUTE] = NOT_EXPAND; // Set to NOT_EXPAND or equivalent constant
-    }
-    
     /* Set up convenience pointers to make the code simpler. Allows
        us to iterate through all of the BY* arrays in the rule. */
 
