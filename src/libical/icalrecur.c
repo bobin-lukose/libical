@@ -1917,47 +1917,60 @@ static void adjust_to_byday(icalrecur_iterator *impl)
 }
 
 icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
-                                           struct icaltimetype dtstart)
-{
+                                           struct icaltimetype dtstart) {
     icalrecur_iterator *impl;
     icalrecurrencetype_frequency freq = rule.freq;
     enum byrule byrule;
 
+    printf("Entering icalrecur_iterator_new\n");
+    fflush(stdout);  // Flush output
+
     icalerror_clear_errno();
+    printf("Cleared icalerror errno\n");
+    fflush(stdout);  // Flush output
 
     if (freq == ICAL_NO_RECURRENCE) {
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
+        printf("Error: ICAL_NO_RECURRENCE\n");
+        fflush(stdout);  // Flush output
         return 0;
     }
 
-#define IN_RANGE(val, min, max) (val >= min && val <= max)
+    #define IN_RANGE(val, min, max) (val >= min && val <= max)
 
-    /* Make sure that DTSTART is a sane value */
     if (!icaltime_is_valid_time(dtstart) ||
         !IN_RANGE(dtstart.year, 0, MAX_TIME_T_YEAR) ||
         !IN_RANGE(dtstart.month, 1, 12) ||
-        !IN_RANGE(dtstart.day, 1,
-                  icaltime_days_in_month(dtstart.month, dtstart.year)) ||
+        !IN_RANGE(dtstart.day, 1, icaltime_days_in_month(dtstart.month, dtstart.year)) ||
         (!dtstart.is_date && (!IN_RANGE(dtstart.hour, 0, 23) ||
                               !IN_RANGE(dtstart.minute, 0, 59) ||
                               !IN_RANGE(dtstart.second, 0, 59)))) {
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
+        printf("Error: Invalid dtstart\n");
+        fflush(stdout);  // Flush output
         return 0;
     }
+    printf("Validated dtstart: %s\n", icaltime_as_ical_string(dtstart));
+    fflush(stdout);  // Flush output
 
     if (!(impl = (icalrecur_iterator *)icalmemory_new_buffer(sizeof(icalrecur_iterator)))) {
         icalerror_set_errno(ICAL_NEWFAILED_ERROR);
+        printf("Error: Memory allocation failed\n");
+        fflush(stdout);  // Flush output
         return 0;
     }
+    printf("Allocated memory for icalrecur_iterator\n");
+    fflush(stdout);  // Flush output
 
     memset(impl, 0, sizeof(icalrecur_iterator));
+    printf("Initialized icalrecur_iterator structure\n");
+    fflush(stdout);  // Flush output
 
     impl->dtstart = dtstart;
     impl->rule = rule;
     impl->iend = icaltime_null_time();
-
-    /* Set up convenience pointers to make the code simpler. Allows
-       us to iterate through all of the BY* arrays in the rule. */
+    printf("Set dtstart, rule, and iend\n");
+    fflush(stdout);  // Flush output
 
     impl->by_ptrs[BY_MONTH] = impl->rule.by_month;
     impl->by_ptrs[BY_WEEK_NO] = impl->rule.by_week_no;
@@ -1968,73 +1981,75 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
     impl->by_ptrs[BY_MINUTE] = impl->rule.by_minute;
     impl->by_ptrs[BY_SECOND] = impl->rule.by_second;
     impl->by_ptrs[BY_SET_POS] = impl->rule.by_set_pos;
+    printf("Set up convenience pointers for BY_* rules\n");
+    fflush(stdout);  // Flush output
 
     memset(impl->orig_data, 0, NUM_BY_PARTS * sizeof(short));
+    printf("Initialized orig_data array\n");
+    fflush(stdout);  // Flush output
 
-    /* Note which by rules had data in them when the iterator was
-       created. We can't use the actual by_x arrays, because the
-       empty ones will be given default values later in this
-       routine. The orig_data array will be used later in has_by_data */
-
-    impl->orig_data[BY_MONTH] =
-        (short)(impl->rule.by_month[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_WEEK_NO] =
-        (short)(impl->rule.by_week_no[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_YEAR_DAY] =
-        (short)(impl->rule.by_year_day[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_MONTH_DAY] =
-        (short)(impl->rule.by_month_day[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_DAY] =
-        (short)(impl->rule.by_day[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_HOUR] =
-        (short)(impl->rule.by_hour[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_MINUTE] =
-        (short)(impl->rule.by_minute[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_SECOND] =
-        (short)(impl->rule.by_second[0] != ICAL_RECURRENCE_ARRAY_MAX);
-    impl->orig_data[BY_SET_POS] =
-        (short)(impl->rule.by_set_pos[0] != ICAL_RECURRENCE_ARRAY_MAX);
-
-    /* Check if the recurrence rule is legal */
+    impl->orig_data[BY_MONTH] = (short)(impl->rule.by_month[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_WEEK_NO] = (short)(impl->rule.by_week_no[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_YEAR_DAY] = (short)(impl->rule.by_year_day[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_MONTH_DAY] = (short)(impl->rule.by_month_day[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_DAY] = (short)(impl->rule.by_day[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_HOUR] = (short)(impl->rule.by_hour[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_MINUTE] = (short)(impl->rule.by_minute[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_SECOND] = (short)(impl->rule.by_second[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    impl->orig_data[BY_SET_POS] = (short)(impl->rule.by_set_pos[0] != ICAL_RECURRENCE_ARRAY_MAX);
+    printf("Recorded original data for BY_* rules\n");
+    fflush(stdout);  // Flush output
 
     for (byrule = 0; byrule < NUM_BY_PARTS; byrule++) {
-        if (expand_map[freq].map[byrule] == ILLEGAL &&
-            has_by_data(impl, byrule)) {
-            ical_invalid_rrule_handling rruleHandlingSetting =
-                ical_get_invalid_rrule_handling_setting();
+        if (expand_map[freq].map[byrule] == ILLEGAL && has_by_data(impl, byrule)) {
+            ical_invalid_rrule_handling rruleHandlingSetting = ical_get_invalid_rrule_handling_setting();
             if (rruleHandlingSetting == ICAL_RRULE_IGNORE_INVALID) {
                 impl->orig_data[byrule] = 0;
+                printf("Ignoring invalid recurrence rule for byrule %d\n", byrule);
+                fflush(stdout);  // Flush output
             } else {
                 icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
                 icalmemory_free_buffer(impl);
+                printf("Error: Illegal recurrence rule for byrule %d\n", byrule);
+                fflush(stdout);  // Flush output
                 return 0;
             }
         }
     }
+    printf("Checked legality of recurrence rule\n");
+    fflush(stdout);  // Flush output
 
     if (initialize_rscale(impl) == 0) {
         icalrecur_iterator_free(impl);
+        printf("Error: RSCALE initialization failed\n");
+        fflush(stdout);  // Flush output
         return 0;
     }
+    printf("Initialized RSCALE\n");
+    fflush(stdout);  // Flush output
 
-    /* Set up defaults for BY_* arrays */
     setup_defaults(impl, BY_SECOND, impl->rstart.second);
-
     setup_defaults(impl, BY_MINUTE, impl->rstart.minute);
-
     setup_defaults(impl, BY_HOUR, impl->rstart.hour);
-
     setup_defaults(impl, BY_MONTH_DAY, impl->rstart.day);
-
     setup_defaults(impl, BY_MONTH, impl->rstart.month);
+    printf("Set up defaults for BY_* arrays\n");
+    fflush(stdout);  // Flush output
 
     if (!__iterator_set_start(impl, dtstart)) {
         icalrecur_iterator_free(impl);
+        printf("Error: Failed to set start date for iterator\n");
+        fflush(stdout);  // Flush output
         return 0;
     }
+    printf("Set start date for iterator\n");
+    fflush(stdout);  // Flush output
 
+    printf("Exiting icalrecur_iterator_new\n");
+    fflush(stdout);  // Flush output
     return impl;
 }
+
 
 void icalrecur_iterator_free(icalrecur_iterator *i)
 {
