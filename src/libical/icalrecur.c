@@ -2118,6 +2118,11 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
     printf("DTSTART: %s\n", icaltime_as_ical_string(dtstart));
     fflush(stdout);
 
+    /* Conditionally modify expand_map for BY_MINUTE */
+    if (freq == ICAL_HOURLY_RECURRENCE) { // Replace with the appropriate frequency constant
+        expand_map[freq].map[BY_MINUTE] = NOT_EXPAND; // Set to NOT_EXPAND or equivalent constant
+    }
+    
     /* Set up convenience pointers to make the code simpler. Allows
        us to iterate through all of the BY* arrays in the rule. */
 
@@ -2181,7 +2186,7 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
 
     /* Set up defaults for BY_* arrays */
     setup_defaults(impl, BY_SECOND, impl->rstart.second);
-    /*setup_defaults(impl, BY_MINUTE, impl->rstart.minute);*/
+    setup_defaults(impl, BY_MINUTE, impl->rstart.minute);
     setup_defaults(impl, BY_HOUR, impl->rstart.hour);
     setup_defaults(impl, BY_MONTH_DAY, impl->rstart.day);
     setup_defaults(impl, BY_MONTH, impl->rstart.month);
