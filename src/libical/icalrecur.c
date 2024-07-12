@@ -3271,9 +3271,9 @@ static int check_contracting_rules(icalrecur_iterator *impl)
     }
 }
 
-struct icaltimetype icalrecur_iterator_next(icalrecur_iterator *impl)
+struct icaltimetype icalrecur_iterator_next_bkup(icalrecur_iterator *impl)
 {
-    printf("In icalrecur_iterator_next function \n");
+    printf("Entering icalrecur_iterator_next\n");
     fflush(stdout);
 
     /* Quit if we reached COUNT or if last time is after the UNTIL time */
@@ -3347,6 +3347,97 @@ struct icaltimetype icalrecur_iterator_next(icalrecur_iterator *impl)
 
     return impl->last;
 }
+
+
+struct icaltimetype icalrecur_iterator_next(icalrecur_iterator *impl)
+{
+    printf("Entering icalrecur_iterator_next\n");
+    fflush(stdout);
+
+    /* Quit if we reached COUNT or if last time is after the UNTIL time */
+    if (!impl ||
+        (impl->rule.count != 0 && impl->occurrence_no >= impl->rule.count) ||
+        (!icaltime_is_null_time(impl->rule.until) &&
+         icaltime_compare(impl->last, impl->rule.until) > 0)) {
+        printf("Exiting: reached COUNT or last time after UNTIL\n");
+        return icaltime_null_time();
+    }
+
+    /* If initial time is valid, return it */
+    if ((impl->occurrence_no == 0) &&
+        (icaltime_compare(impl->last, impl->istart) >= 0) &&
+        check_contracting_rules(impl)) {
+        impl->occurrence_no++;
+        printf("Returning initial occurrence: %s\n", icaltime_as_ical_string(impl->last));
+        return impl->last;
+    }
+
+    /* Iterate until we get the next valid time */
+    do {
+        switch (impl->rule.freq) {
+        case ICAL_SECONDLY_RECURRENCE:
+            next_second(impl);
+            break;
+
+        case ICAL_MINUTELY_RECURRENCE:
+            next_minute(impl);
+            break;
+
+        case ICAL_HOURLY_RECURRENCE:
+            next_hour(impl);
+            break;
+
+        case ICAL_DAILY_RECURRENCE:
+            next_day(impl);
+            break;
+
+        case ICAL_WEEKLY_RECURRENCE:
+            next_week(impl);
+            break;
+
+        case ICAL_MONTHLY_RECURRENCE:
+            next_month(impl);
+            break;
+
+        case ICAL_YEARLY_RECURRENCE:
+            next_year(impl);
+            break;
+
+        default:
+            icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
+            printf("Exiting: invalid frequency\n");
+            return icaltime_null_time();
+        }
+
+        impl->last = occurrence_as_icaltime(impl, 1);
+
+        // Log the calculated occurrence
+        printf("Calculated next occurrence: %s\n", icaltime_as_ical_string(impl->last));
+        fflush(stdout);
+
+        /* Ignore times that are after the MAX year,
+           or the UNTIL time, or the end time */
+        if (impl->last.year > MAX_TIME_T_YEAR ||
+            (!icaltime_is_null_time(impl->rule.until) &&
+             icaltime_compare(impl->last, impl->rule.until) > 0) ||
+            (!icaltime_is_null_time(impl->iend) &&
+             icaltime_compare(impl->last, impl->iend) >= 0)) {
+            printf("Exiting: occurrence out of valid range\n");
+            return icaltime_null_time();
+        }
+
+    } while (icaltime_compare(impl->last, impl->istart) < 0 ||
+             !check_contracting_rules(impl));
+
+    impl->occurrence_no++;
+
+    printf("Returning occurrence: %s\n", icaltime_as_ical_string(impl->last));
+    fflush(stdout);
+
+    return impl->last;
+}
+
+
 
 struct icaltimetype icalrecur_iterator_prev(icalrecur_iterator *impl)
 {
