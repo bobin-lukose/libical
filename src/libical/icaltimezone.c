@@ -27,7 +27,6 @@
 #include <limits.h>
 
 #include <stdio.h>
-#include <string.h>
 
 #if ICAL_SYNC_MODE == ICAL_SYNC_MODE_PTHREAD
 #include <pthread.h>
@@ -1535,14 +1534,13 @@ icaltimezone *icaltimezone_get_builtin_timezone_from_tzid(const char *tzid)
 icaltimezone *icaltimezone_get_utc_timezone(void)
 {
     printf("Entering function icaltimezone_get_utc_timezone\n");
-    fflush(stdout);  
+    fflush(stdout);
 
     if (!builtin_timezones)
         icaltimezone_init_builtin_timezones();
 
     printf("UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
     fflush(stdout);
-
 
     return &utc_timezone;
 }
@@ -1554,22 +1552,21 @@ icaltimezone *icaltimezone_get_utc_timezone(void)
  */
 static void icaltimezone_init_builtin_timezones(void)
 {
-
     printf("Entering function icaltimezone_init_builtin_timezones\n");
     fflush(stdout);
-    
+
     /* Initialize the special UTC timezone. */
     utc_timezone.tzid = (char *)"UTC";
 
     icaltimezone_builtin_lock();
     if (!builtin_timezones) {
         printf("builtin_timezones not initialized, calling icaltimezone_parse_zone_tab\n");
-        fflush(stdout);
+        fflush(stdout);        
         icaltimezone_parse_zone_tab();
     }
     icaltimezone_builtin_unlock();
     printf("Exiting function icaltimezone_init_builtin_timezones\n");
-    fflush(stdout);
+    fflush(stdout);    
 }
 
 static int parse_coord(char *coord, int len, int *degrees, int *minutes, int *seconds)
@@ -1660,6 +1657,20 @@ static int fetch_lat_long_from_string(const char *str,
  */
 static void icaltimezone_parse_zone_tab(void)
 {
+    printf("Entering function icaltimezone_parse_zone_tab\n");
+    fflush(stdout);
+
+    // Example of initializing utc_timezone
+    // This should be adjusted to match your actual timezone initialization logic
+    utc_timezone.tznames = (char *)"UTC";
+    utc_timezone.location = (char *)"UTC Location"; // Add appropriate location
+    utc_timezone.tzid = (char *)"UTC";
+    utc_timezone.offset = 0; // Set appropriate offset
+
+    // Add log for initialized values
+    printf("Initialized UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.offset, utc_timezone.location);
+    fflush(stdout);    
+
     const char *zonedir, *zonetab;
     char *filename;
     FILE *fp;
