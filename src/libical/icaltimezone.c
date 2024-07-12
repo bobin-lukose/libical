@@ -1539,7 +1539,8 @@ icaltimezone *icaltimezone_get_utc_timezone(void)
     if (!builtin_timezones)
         icaltimezone_init_builtin_timezones();
 
-    printf("UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
+    printf("UTC Timezone: %s (ID: %s, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
+
     fflush(stdout);
 
     return &utc_timezone;
@@ -1668,7 +1669,8 @@ static void icaltimezone_parse_zone_tab(void)
     utc_timezone.offset = 0; // Set appropriate offset
 
     // Add log for initialized values
-    printf("Initialized UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.offset, utc_timezone.location);
+    printf("Initialized UTC Timezone: %s (ID: %s, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
+
     fflush(stdout);    
 
     const char *zonedir, *zonetab;
