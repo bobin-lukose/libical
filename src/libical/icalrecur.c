@@ -134,6 +134,8 @@
 #include <stddef.h> /* For offsetof() macro */
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #if ICAL_SYNC_MODE == ICAL_SYNC_MODE_PTHREAD
 #include <pthread.h>
 static pthread_mutex_t invalid_rrule_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -1929,7 +1931,9 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
         return 0;
     }
-    printf("Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
+
+printf("icalrecur_iterator_new function Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
+fflush(stdout);
 
 #define IN_RANGE(val, min, max) (val >= min && val <= max)
 
@@ -1943,7 +1947,7 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
                               !IN_RANGE(dtstart.minute, 0, 59) ||
                               !IN_RANGE(dtstart.second, 0, 59)))) {
 
-    printf("Invalid DTSTART: %s\n", icaltime_as_ical_string(dtstart));
+    printf("Invalid DTSTART");
 
 
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
