@@ -1942,6 +1942,10 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
         (!dtstart.is_date && (!IN_RANGE(dtstart.hour, 0, 23) ||
                               !IN_RANGE(dtstart.minute, 0, 59) ||
                               !IN_RANGE(dtstart.second, 0, 59)))) {
+
+    printf("Invalid DTSTART: %s\n", icaltime_as_ical_string(dtstart));
+
+
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
         return 0;
     }
