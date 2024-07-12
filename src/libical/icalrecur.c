@@ -1020,32 +1020,24 @@ static void setup_defaults(icalrecur_iterator *impl,
 
     printf("Entering setup_defaults\n");
     printf("Frequency: %d, BY rule: %d, Default time: %d\n", freq, byrule, deftime);
-    fflush(stdout);
 
     if (expand_map[freq].map[byrule] == EXPAND) {
         printf("Expanding BY rule: %d\n", byrule);
         
-        // Skip processing for BY rule 6
-        if (byrule != 6) {
-            if (impl->by_ptrs[byrule][0] == ICAL_RECURRENCE_ARRAY_MAX) {
-                printf("Current value for BY rule %d is ICAL_RECURRENCE_ARRAY_MAX\n", byrule);
-                impl->by_ptrs[byrule][0] = (short)deftime;
-                printf("Setting BY rule %d to default time: %d\n", byrule, deftime);
-            } else {
-                printf("BY rule %d already set to: %d\n", byrule, impl->by_ptrs[byrule][0]);
-            }
+        /* Re-write the BY rule arrays with data from the DTSTART time */
+        if (impl->by_ptrs[byrule][0] == ICAL_RECURRENCE_ARRAY_MAX) {
+            printf("Current value for BY rule %d is ICAL_RECURRENCE_ARRAY_MAX\n", byrule);
+            impl->by_ptrs[byrule][0] = (short)deftime;
+            printf("Setting BY rule %d to default time: %d\n", byrule, deftime);
         } else {
-            printf("Skipping setting for BY rule %d\n", byrule);
+            printf("BY rule %d already set to: %d\n", byrule, impl->by_ptrs[byrule][0]);
         }
-
     } else {
         printf("BY rule %d does not need to be expanded\n", byrule);
     }
 
     printf("Exiting setup_defaults\n");
-    fflush(stdout);
 }
-
 
 
 /** Calculate ISO weeks per year
@@ -2189,7 +2181,7 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
 
     /* Set up defaults for BY_* arrays */
     setup_defaults(impl, BY_SECOND, impl->rstart.second);
-    setup_defaults(impl, BY_MINUTE, impl->rstart.minute);
+    /*setup_defaults(impl, BY_MINUTE, impl->rstart.minute);*/
     setup_defaults(impl, BY_HOUR, impl->rstart.hour);
     setup_defaults(impl, BY_MONTH_DAY, impl->rstart.day);
     setup_defaults(impl, BY_MONTH, impl->rstart.month);
