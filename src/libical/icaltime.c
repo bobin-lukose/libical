@@ -269,7 +269,8 @@ icaltime_t icaltime_as_timet(const struct icaltimetype tt)
 
 icaltime_t icaltime_as_timet_with_zone(const struct icaltimetype tt, const icaltimezone *zone)
 {
-    elog(WARNING, "Entering icaltime_as_timet_with_zone");
+    printf("Entering icaltime_as_timet_with_zone\n");
+    fflush(stdout);  // Flush output
 
     icaltimezone *utc_zone;
     struct tm stm;
@@ -280,19 +281,22 @@ icaltime_t icaltime_as_timet_with_zone(const struct icaltimetype tt, const icalt
 
     /* Return 0 if the time is the special null time or a bad time */
     if (icaltime_is_null_time(tt) || !icaltime_is_valid_time(tt)) {
-        elog(WARNING, "Null or invalid time provided: %s", icaltime_as_ical_string(tt));
+        printf("Null or invalid time provided: %s\n", icaltime_as_ical_string(tt));
+        fflush(stdout);  // Flush output
         return 0;
     }
 
     local_tt = tt;
-    elog(WARNING, "Initial icaltimetype: %s", icaltime_as_ical_string(local_tt));
+    printf("Initial icaltimetype: %s\n", icaltime_as_ical_string(local_tt));
+    fflush(stdout);  // Flush output
 
     /* Clear the is_date flag, so we can convert the time. */
     local_tt.is_date = 0;
 
     /* Use our timezone functions to convert to UTC. */
     icaltimezone_convert_time(&local_tt, (icaltimezone *)zone, utc_zone);
-    elog(WARNING, "Converted icaltimetype to UTC: %s", icaltime_as_ical_string(local_tt));
+    printf("Converted icaltimetype to UTC: %s\n", icaltime_as_ical_string(local_tt));
+    fflush(stdout);  // Flush output
 
     /* Copy the icaltimetype to a struct tm. */
     memset(&stm, 0, sizeof(struct tm));
@@ -306,7 +310,8 @@ icaltime_t icaltime_as_timet_with_zone(const struct icaltimetype tt, const icalt
     stm.tm_isdst = -1;
 
     t = icaltime_timegm(&stm);
-    elog(WARNING, "Converted time_t: %ld", t);
+    printf("Converted time_t: %ld\n", t);
+    fflush(stdout);  // Flush output
 
     return t;
 }
