@@ -51,6 +51,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include <string.h>  // For memset
+#include <stdio.h>   // For printf (if necessary)
+
 /* The first array is for non-leap years, the second for leap years*/
 static const int days_in_year_passed_month[2][13] = {
     /* jan feb mar  apr  may  jun  jul  aug  sep  oct  nov  dec */
@@ -266,6 +269,8 @@ icaltime_t icaltime_as_timet(const struct icaltimetype tt)
 
 icaltime_t icaltime_as_timet_with_zone(const struct icaltimetype tt, const icaltimezone *zone)
 {
+    elog(WARNING, "Entering icaltime_as_timet_with_zone");
+
     icaltimezone *utc_zone;
     struct tm stm;
     icaltime_t t;
@@ -275,16 +280,19 @@ icaltime_t icaltime_as_timet_with_zone(const struct icaltimetype tt, const icalt
 
     /* Return 0 if the time is the special null time or a bad time */
     if (icaltime_is_null_time(tt) || !icaltime_is_valid_time(tt)) {
+        elog(WARNING, "Null or invalid time provided: %s", icaltime_as_ical_string(tt));
         return 0;
     }
 
     local_tt = tt;
+    elog(WARNING, "Initial icaltimetype: %s", icaltime_as_ical_string(local_tt));
 
     /* Clear the is_date flag, so we can convert the time. */
     local_tt.is_date = 0;
 
     /* Use our timezone functions to convert to UTC. */
     icaltimezone_convert_time(&local_tt, (icaltimezone *)zone, utc_zone);
+    elog(WARNING, "Converted icaltimetype to UTC: %s", icaltime_as_ical_string(local_tt));
 
     /* Copy the icaltimetype to a struct tm. */
     memset(&stm, 0, sizeof(struct tm));
@@ -298,6 +306,7 @@ icaltime_t icaltime_as_timet_with_zone(const struct icaltimetype tt, const icalt
     stm.tm_isdst = -1;
 
     t = icaltime_timegm(&stm);
+    elog(WARNING, "Converted time_t: %ld", t);
 
     return t;
 }
