@@ -999,7 +999,7 @@ static int has_by_data(icalrecur_iterator *impl, enum byrule byrule)
     return (impl->orig_data[byrule] == 1);
 }
 
-static void setup_defaults(icalrecur_iterator *impl,
+static void setup_defaults_bkup(icalrecur_iterator *impl,
                            enum byrule byrule, int deftime)
 {
     icalrecurrencetype_frequency freq = impl->rule.freq;
@@ -1012,6 +1012,33 @@ static void setup_defaults(icalrecur_iterator *impl,
         }
     }
 }
+
+static void setup_defaults(icalrecur_iterator *impl,
+                           enum byrule byrule, int deftime)
+{
+    icalrecurrencetype_frequency freq = impl->rule.freq;
+
+    printf("Entering setup_defaults\n");
+    printf("Frequency: %d, BY rule: %d, Default time: %d\n", freq, byrule, deftime);
+
+    if (expand_map[freq].map[byrule] == EXPAND) {
+        printf("Expanding BY rule: %d\n", byrule);
+        
+        /* Re-write the BY rule arrays with data from the DTSTART time */
+        if (impl->by_ptrs[byrule][0] == ICAL_RECURRENCE_ARRAY_MAX) {
+            printf("Current value for BY rule %d is ICAL_RECURRENCE_ARRAY_MAX\n", byrule);
+            impl->by_ptrs[byrule][0] = (short)deftime;
+            printf("Setting BY rule %d to default time: %d\n", byrule, deftime);
+        } else {
+            printf("BY rule %d already set to: %d\n", byrule, impl->by_ptrs[byrule][0]);
+        }
+    } else {
+        printf("BY rule %d does not need to be expanded\n", byrule);
+    }
+
+    printf("Exiting setup_defaults\n");
+}
+
 
 /** Calculate ISO weeks per year
    https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year */
