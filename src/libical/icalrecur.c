@@ -3352,6 +3352,7 @@ struct icaltimetype icalrecur_iterator_next_bkup(icalrecur_iterator *impl)
 struct icaltimetype icalrecur_iterator_next(icalrecur_iterator *impl)
 {
     printf("Entering icalrecur_iterator_next\n");
+    printf("impl last value initial: %s\n", icaltime_as_ical_string(impl->last));
     fflush(stdout);
 
     /* Quit if we reached COUNT or if last time is after the UNTIL time */
