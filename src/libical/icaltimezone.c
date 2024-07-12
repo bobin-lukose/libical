@@ -1666,11 +1666,9 @@ static void icaltimezone_parse_zone_tab(void)
     utc_timezone.tznames = (char *)"UTC";
     utc_timezone.location = (char *)"UTC Location"; // Add appropriate location
     utc_timezone.tzid = (char *)"UTC";
-    utc_timezone.offset = 0; // Set appropriate offset
 
     // Add log for initialized values
     printf("Initialized UTC Timezone: %s (ID: %s, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
-
     fflush(stdout);    
 
     const char *zonedir, *zonetab;
