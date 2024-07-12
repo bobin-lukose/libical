@@ -1534,13 +1534,14 @@ icaltimezone *icaltimezone_get_builtin_timezone_from_tzid(const char *tzid)
 
 icaltimezone *icaltimezone_get_utc_timezone(void)
 {
-printf("1.Entering function icaltimezone_get_utc_timezone\n");
-fflush(stdout);    
+    printf("Entering function icaltimezone_get_utc_timezone\n");
+    fflush(stdout);  
 
     if (!builtin_timezones)
         icaltimezone_init_builtin_timezones();
 
-    printf("3. UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
+    printf("UTC Timezone: %s (Offset: %d, Location: %s)\n", utc_timezone.tznames, utc_timezone.tzid, utc_timezone.location);
+    fflush(stdout);
 
 
     return &utc_timezone;
@@ -1554,17 +1555,21 @@ fflush(stdout);
 static void icaltimezone_init_builtin_timezones(void)
 {
 
-    printf("2.Entering function icaltimezone_init_builtin_timezones\n");
+    printf("Entering function icaltimezone_init_builtin_timezones\n");
+    fflush(stdout);
     
     /* Initialize the special UTC timezone. */
     utc_timezone.tzid = (char *)"UTC";
 
     icaltimezone_builtin_lock();
     if (!builtin_timezones) {
-        printf("3.Entering if !builtin_timezones\n");
+        printf("builtin_timezones not initialized, calling icaltimezone_parse_zone_tab\n");
+        fflush(stdout);
         icaltimezone_parse_zone_tab();
     }
     icaltimezone_builtin_unlock();
+    printf("Exiting function icaltimezone_init_builtin_timezones\n");
+    fflush(stdout);
 }
 
 static int parse_coord(char *coord, int len, int *degrees, int *minutes, int *seconds)
