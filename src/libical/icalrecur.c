@@ -1916,20 +1916,21 @@ static void adjust_to_byday(icalrecur_iterator *impl)
     }
 }
 
-
 icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
                                            struct icaltimetype dtstart)
 {
     icalrecur_iterator *impl;
     icalrecurrencetype_frequency freq = rule.freq;
-    enum byrule byrule;
 
     printf("Entering icalrecur_iterator_new\n");
-    fflush(stdout);  // Flush output
+    fflush(stdout);
+
+    printf("Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
+    fflush(stdout);
 
     icalerror_clear_errno();
     printf("Cleared icalerror errno\n");
-    fflush(stdout);  // Flush output
+    fflush(stdout);
 
     if (freq == ICAL_NO_RECURRENCE) {
         icalerror_set_errno(ICAL_MALFORMEDDATA_ERROR);
@@ -1937,15 +1938,16 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
     }
 
     printf("Validated freq: %d\n", freq);
-    fflush(stdout);  // Flush output
+    fflush(stdout);
+
+#define IN_RANGE(val, min, max) (val >= min && val <= max)
 
     /* Make sure that DTSTART is a sane value */
-    printf("Initial dtstart: %s\n", icaltime_as_ical_string(dtstart));
-
     if (!icaltime_is_valid_time(dtstart) ||
         !IN_RANGE(dtstart.year, 0, MAX_TIME_T_YEAR) ||
         !IN_RANGE(dtstart.month, 1, 12) ||
-        !IN_RANGE(dtstart.day, 1, icaltime_days_in_month(dtstart.month, dtstart.year)) ||
+        !IN_RANGE(dtstart.day, 1,
+                  icaltime_days_in_month(dtstart.month, dtstart.year)) ||
         (!dtstart.is_date && (!IN_RANGE(dtstart.hour, 0, 23) ||
                               !IN_RANGE(dtstart.minute, 0, 59) ||
                               !IN_RANGE(dtstart.second, 0, 59)))) {
@@ -1954,26 +1956,21 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
     }
 
     printf("Validated dtstart: %s\n", icaltime_as_ical_string(dtstart));
-    fflush(stdout);  // Flush output
+    fflush(stdout);
 
     if (!(impl = (icalrecur_iterator *)icalmemory_new_buffer(sizeof(icalrecur_iterator)))) {
         icalerror_set_errno(ICAL_NEWFAILED_ERROR);
         return 0;
     }
 
-    printf("Allocated memory for icalrecur_iterator\n");
-    fflush(stdout);  // Flush output
-
     memset(impl, 0, sizeof(icalrecur_iterator));
-    printf("Initialized icalrecur_iterator structure\n");
-    fflush(stdout);  // Flush output
 
     impl->dtstart = dtstart;
     impl->rule = rule;
     impl->iend = icaltime_null_time();
 
     printf("Set dtstart, rule, and iend\n");
-    fflush(stdout);  // Flush output
+    fflush(stdout);
 
     /* Set up convenience pointers to make the code simpler. Allows
        us to iterate through all of the BY* arrays in the rule. */
@@ -1990,16 +1987,11 @@ icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
 
     memset(impl->orig_data, 0, NUM_BY_PARTS * sizeof(short));
 
-    printf("Set up convenience pointers for BY_* rules\n");
-    fflush(stdout);  // Flush output
-
     printf("Exiting icalrecur_iterator_new\n");
-    fflush(stdout);  // Flush output
+    fflush(stdout);
 
     return impl;
 }
-
-
 
 
 void icalrecur_iterator_free(icalrecur_iterator *i)
