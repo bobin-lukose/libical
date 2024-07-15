@@ -362,7 +362,7 @@ static const struct expand_split_map_struct expand_map[] = {
     {ICAL_SECONDLY_RECURRENCE, {1, 3, 1, 1, 1, 1, 1, 1, 1}},
     {ICAL_MINUTELY_RECURRENCE, {1, 3, 1, 1, 1, 1, 1, 2, 1}},
     {ICAL_HOURLY_RECURRENCE, {1, 3, 1, 1, 1, 1, 2, 2, 1}},
-    {ICAL_DAILY_RECURRENCE, {1, 3, 3, 1, 1, 2, 1, 2, 1}},
+    {ICAL_DAILY_RECURRENCE, {1, 3, 3, 1, 1, 2, 2, 2, 1}},
     {ICAL_WEEKLY_RECURRENCE, {1, 3, 3, 3, 2, 2, 2, 2, 1}},
     {ICAL_MONTHLY_RECURRENCE, {1, 3, 3, 2, 2, 2, 2, 2, 1}},
     {ICAL_YEARLY_RECURRENCE, {2, 2, 2, 2, 2, 2, 2, 2, 1}},
